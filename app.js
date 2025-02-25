@@ -70,22 +70,21 @@ app.post('/thankyou', async (req, res) => {
         size: req.body.size
     };
 
+    //Connect to the database
     const conn = await connect();
 
-    const orders = await conn.query(`INSERT INTO orders 
-        (firstName, lastName, email, method, toppings, size) 
-        VALUES (?, ?, ?, ?, ?, ?)`, [order.fname,
-        order.lname,
-        order.email,
-        order.method,
-        order.toppings,
-        order.size]);
+    // Add the order to our database
+    const insertQuery = await conn.query(`insert into orders 
+        (fname, lname, email, size, method, toppings)
+        values (?, ?, ?, ?, ?, ?)`,
+        [ order.fname, order.lname, order.email, order.size, 
+        order.method, order.toppings ]);
 
+    // INSERT INTO tbl (field1, field2) VALUES (?, ?)
+    
     // Send our thank you page
     res.render('thankyou', { order });
 });
-
-
 
 //Tell the server to listen on our specified port
 app.listen(PORT, () => {
