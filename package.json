@@ -1,5 +1,5 @@
 {
-  "name": "pizza-node",
+  "name": "pizza-node-ejs",
   "version": "1.0.0",
   "description": "\"Node-ifying\" the pizza app",
   "main": "app.js",

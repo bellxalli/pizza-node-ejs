@@ -59,7 +59,7 @@ app.get('/admin', async (req, res) => {
 });
 
 //Define a "thank you" route
-app.post('/thankyou', (req, res) => {
+app.post('/thankyou', async (req, res) => {
 
     const order = {
         fname: req.body.fname,
@@ -70,13 +70,22 @@ app.post('/thankyou', (req, res) => {
         size: req.body.size
     };
 
-    // Add the order to our array
-    //orders.push(order);
-    //console.log(orders);
+    const conn = await connect();
+
+    const orders = await conn.query(`INSERT INTO orders 
+        (firstName, lastName, email, method, toppings, size) 
+        VALUES (?, ?, ?, ?, ?, ?)`, [order.fname,
+        order.lname,
+        order.email,
+        order.method,
+        order.toppings,
+        order.size]);
 
     // Send our thank you page
     res.render('thankyou', { order });
 });
+
+
 
 //Tell the server to listen on our specified port
 app.listen(PORT, () => {
