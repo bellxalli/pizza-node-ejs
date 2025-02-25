@@ -6,7 +6,7 @@ import mariadb from 'mariadb';
 const pool = mariadb.createPool({
     host: 'localhost',
     user: 'root',
-    password: '1234',
+    password: '3027',
     database: 'pizza',
     port: '3306'
 });
@@ -70,21 +70,91 @@ app.post('/thankyou', async (req, res) => {
         size: req.body.size
     };
 
+    const result = validateForm(order);
+    if(!result.isValid)
+    {
+        console.log(result);
+        res.send(result.errors);
+        return;
+    }
+
+    if(order.toppings)
+    {
+        if(Array.isArray(order.toppings)){
+            order.toppings = order.toppings.join(", ");
+        }
+    }
+    else
+    {
+        order.toppings = "";
+    }
+
     //Connect to the database
     const conn = await connect();
 
     // Add the order to our database
     const insertQuery = await conn.query(`insert into orders 
-        (fname, lname, email, size, method, toppings)
+        (firstName, lastName, email, size, method, toppings)
         values (?, ?, ?, ?, ?, ?)`,
-        [ order.fname, order.lname, order.email, order.size, 
-        order.method, order.toppings ]);
+        [order.fname, order.lname, order.email, order.size, 
+        order.method, order.toppings]);
 
     // INSERT INTO tbl (field1, field2) VALUES (?, ?)
     
     // Send our thank you page
     res.render('thankyou', { order });
 });
+
+function validateForm(data)
+{
+    const errors = [];
+
+    if(!data.fname || data.fname.trim() === "")
+    {
+        errors.push("first name is required");
+    }
+
+    if(!data.lname || data.lname.trim() === "")
+    {
+        errors.push("last name is required");
+    }
+
+    if(!data.email || data.email.trim() === "" || data.email.indexOf("@") === -1 || data.email.indexOf(".") === -1)
+    {
+        errors.push("email is required and @ and .");
+    }
+
+    if(!data.method)
+    {
+        errors.push("selection pickup or delivery");
+    }
+    else
+    {
+        let validOptions = ["pickup", "delivery"];
+        if(!validOptions.includes(data.method))
+        {
+            errors.push("go away, evildoer!")
+        }
+    }
+
+    if(!data.size)
+    {
+        errors.push("selection small, medium, or large");
+    }
+    else
+    {
+        let validOptions = ["small", "med", "large"];
+        if(!validOptions.includes(data.method))
+        {
+            errors.push("go away, evildoer!")
+        }
+    }
+
+    return{
+        isValid: errors.length === 0,
+        errors
+    }
+}
 
 //Tell the server to listen on our specified port
 app.listen(PORT, () => {
