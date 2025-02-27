@@ -1,16 +1,18 @@
 //Import Libraries
 import express from 'express';
 import mariadb from 'mariadb';
-
 import {validateForm} from './services/validation.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 //Define our database credentials
 const pool = mariadb.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: '3027',
-    database: 'pizza',
-    port: '3306'
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.PORT
 });
 
 //Define function to connect to the DB
@@ -37,7 +39,7 @@ app.set('view engine', 'ejs');
 app.use(express.static('public'));
 
 //Define a port number for our server to listen on
-const PORT = 3000;
+const PORT = process.env.APP_PORT || 3000;
 
 //Define a "default" route for our home page
 app.get('/', (req, res) => {
